@@ -24,7 +24,7 @@ inputs:
   release:
     description: 'The Minder client release to download and use. Defaults to a specific version for each release of the action.'
     required: false
-    default: 'v0.0.88'
+    default: 'v0.1.0'
 runs:
   using: composite
   steps:
@@ -34,20 +34,6 @@ runs:
       uses: mindersec/minder-client-installer@v1.0.0
       with:
         release: ${{ inputs.release }}
-    # TODO: rather than setting $MINDER_TOKEN, build this into the minder CLI
-    # ACTIONS_ID_TOKEN_REQUEST_URL is set by GitHub Actions when the id-token
-    # permission is available.
-    - name: Fetch ID token
-      shell: bash
-      run: |
-        set -x -e
-          echo $GITHUB_TOKEN
-          URL="${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=minder"
-          curl -o .action-token -H "Authorization: Bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" $URL
-          # Mask the token as a secret, so it won't be printed to the logs
-          echo "::add-mask::$(jq -r .value <.action-token)"
-          echo "MINDER_AUTH_TOKEN=$(jq -r .value <.action-token)" >> "$GITHUB_ENV"
-          rm .action-token
     - name: Apply Minder ruletypes
       if: (inputs.project != '' && inputs.directory != '')
       shell: bash

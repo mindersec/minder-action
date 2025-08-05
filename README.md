@@ -7,7 +7,7 @@ This action [installs the Minder CLI](https://mindersec.github.io/getting_starte
 Before using this action, you will need to grant the GitHub Action role permission to manage your Minder project.  You can use the `project role grant` sub-command to grant permissions on the server, for example:
 
 ```bash
-minder project role grant --grpc-host api.custcodian.dev \
+minder project role grant \
   --project 00000000-0000-0000-0000-000000000000 \
   --sub githubactions/repo:myorg/myrepo:ref:refs/heads/main \
   --role admin
@@ -51,7 +51,7 @@ jobs:
         # the action will install the minder CLI and add it to the PATH, but
         # will not apply any configuration, so you can (for example) generate
         # configuration and apply it in a later step.
-        directory: .github/minderconfig
+        directory: .github/minder
 ```
 
 ## Inputs
