@@ -71,3 +71,37 @@ A directory (or file) containing Minder configuration YAML to apply to the serve
 ### `release`
 
 _(optional)_ The Minder client release to download and use.  By default, this is hard-coded to a specific version for each release of the action, so that if you pin the action, you won't pick up new versions of the CLI until requested.
+
+## Rule Testing Sub-Action
+
+You can also use this repository to run tests for your custom Minder rules using the `mindersec/minder-action/test` sub-action. This action uses `mindev test` to run your `*.star` rule tests and outputs JUnit XML results.
+
+### Usage
+
+```yaml
+name: Test Minder Rules
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Run Rule Tests
+      uses: mindersec/minder-action/test@v1
+      with:
+        minder_version: 'latest'
+        rules_directory: 'rules/'
+        
+    - name: Publish Test Report
+      uses: mikepenz/action-junit-report@v4
+      if: success() || failure() # always run even if tests fail
+      with:
+        report_paths: 'test-results.xml'
+```
+
+### Inputs for `test` action:
+- `minder_version`: Version of mindev to use (e.g., `v0.1.3` or `latest`). Default: `latest`.
+- `rules_directory`: The directory containing your `*.star` test files. Default: `.`.
+- `install_dir`: Where to install the mindev binary temporarily. Default: `$HOME/.mindev`.
