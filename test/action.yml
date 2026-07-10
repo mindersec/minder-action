@@ -49,6 +49,8 @@ runs:
 
         release_number="$(echo "$release_version" | sed 's/v//')"
 
+        compression_extension=".tar.gz"
+
         # Determine file name based on OS and architecture
         case ${{ runner.os }} in
           Linux|linux)
@@ -58,11 +60,24 @@ runs:
               *) log_error "unsupported architecture ${{ runner.arch }}"; exit 1 ;;
             esac
             ;;
+          macOS|macos)
+            case ${{ runner.arch }} in
+              X64|amd64) desired_minder_filename="minder_${release_number}_darwin_amd64" ;;
+              ARM64|arm64) desired_minder_filename="minder_${release_number}_darwin_arm64" ;;
+              *) log_error "unsupported architecture ${{ runner.arch }}"; exit 1 ;;
+            esac
+            ;;
+          Windows|windows)
+            compression_extension=".zip"
+            case ${{ runner.arch }} in
+              X64|amd64) desired_minder_filename="minder_${release_number}_windows_amd64" ;;
+              ARM64|arm64) desired_minder_filename="minder_${release_number}_windows_arm64" ;;
+              *) log_error "unsupported architecture ${{ runner.arch }}"; exit 1 ;;
+            esac
+            ;;
           *)
-            log_error "unsupported OS ${{ runner.os }}. Currently only Linux runners are supported."; exit 1 ;;
+            log_error "unsupported OS ${{ runner.os }}"; exit 1 ;;
         esac
-
-        compression_extension=".tar.gz"
 
         # Download the release tarball, signature, and PEM
         curl -fsL "https://github.com/mindersec/minder/releases/download/${release_version}/${desired_minder_filename}${compression_extension}" -o "${desired_minder_filename}${compression_extension}"
@@ -80,16 +95,33 @@ runs:
 
         # Extract mindev
         log_info "Extracting mindev..."
-        tar -xzf "${desired_minder_filename}${compression_extension}"
+        case ${{ runner.os }} in
+          Linux|linux|macOS|macos)
+            tar -xzf "${desired_minder_filename}${compression_extension}"
+            ;;
+          Windows|windows)
+            unzip -o "${desired_minder_filename}${compression_extension}"
+            ;;
+        esac
 
-        chmod +x mindev
+        # Set executable permissions (Windows ignores this, but it's safe)
+        chmod +x mindev*
         log_info "Installation complete!"
 
     - name: Add mindev to PATH
+      if: ${{ runner.os == 'Linux' || runner.os == 'macOS' }}
       run: |
         eval INSTALL_DIR="${{ inputs.install_dir }}"
         echo "$INSTALL_DIR" >> $GITHUB_PATH
       shell: bash
+
+    - name: Add mindev to PATH (Windows)
+      if: ${{ runner.os == 'Windows' }}
+      run: |
+        $InstallDir = "${{ inputs.install_dir }}"
+        $InstallDir = $ExecutionContext.InvokeCommand.ExpandString($InstallDir)
+        echo "$InstallDir" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+      shell: pwsh
 
     - name: Run mindev test
       shell: bash

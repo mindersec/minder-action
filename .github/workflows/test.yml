@@ -1,0 +1,32 @@
+name: Test test-action on all OSs
+on:
+  push:
+    branches:
+      - main
+      - feat/test-action-cross-os
+  pull_request:
+
+jobs:
+  test-action:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      
+      # We need a dummy test file so mindev doesn't complain about no tests
+      - name: Create dummy rule test
+        shell: bash
+        run: |
+          mkdir -p dummy_rule_test
+          cat << 'STAR' > dummy_rule_test/test.star
+          def test_dummy():
+              assert True
+          STAR
+
+      - name: Run test action
+        uses: ./test
+        with:
+          minder_version: latest
+          rules_directory: ./dummy_rule_test
