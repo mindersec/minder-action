@@ -2,13 +2,13 @@
 # It has more functionality, and is under a new name, as it makes some slighly
 # different design decisions.
 name: Load Minder Configuration
-author: custcodian
+author: Minder Community
 description: |
   This action installs the minder CLI and optionally configures it with server
   authentication and uses it to install rules, data sources, and profiles from
   checked-in configuration.
 branding:
-  icon: package
+  icon: upload-cloud
   color: blue
 inputs:
   server:
@@ -24,16 +24,18 @@ inputs:
   release:
     description: 'The Minder client release to download and use. Defaults to a specific version for each release of the action.'
     required: false
-    default: 'v0.1.0'
+    default: 'v0.2.2'
 runs:
   using: composite
   steps:
     - name: Install Cosign
-      uses: sigstore/cosign-installer@v3.6.0
+      uses: sigstore/cosign-installer@v4.1.2
+
     - name: Install and validate CLI
-      uses: mindersec/minder-client-installer@v1.0.0
+      uses: mindersec/minder-client-installer@v1.1.0
       with:
         release: ${{ inputs.release }}
+
     - name: Apply Minder ruletypes
       if: (inputs.project != '' && inputs.directory != '')
       shell: bash
@@ -41,5 +43,6 @@ runs:
         MINDER_GRPC_SERVER_PORT: 443
         MINDER_GRPC_SERVER_HOST: ${{ inputs.server }}
         MINDER_PROJECT: ${{ inputs.project }}
+        RULES_DIRECTORY: ${{ inputs.directory }}
       run: |
-        minder apply -f ${{ inputs.directory }}
+        minder apply -f "$RULES_DIRECTORY"
