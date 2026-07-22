@@ -89,6 +89,7 @@ jobs:
     - uses: actions/checkout@v4
     
     - name: Run Rule Tests
+      id: minder-tests
       uses: mindersec/minder-action/test@v1
       with:
         minder_version: 'latest'
@@ -98,10 +99,10 @@ jobs:
       uses: mikepenz/action-junit-report@v4
       if: success() || failure() # always run even if tests fail
       with:
-        report_paths: 'test-results.xml'
+        report_paths: ${{ steps.minder-tests.outputs.junit-filename }}
 ```
 
 ### Inputs for `test` action:
-- `minder_version`: Version of mindev to use (e.g., `v0.1.3` or `latest`). Default: `latest`.
-- `rules_directory`: The directory containing your `*.star` test files. Default: `.`.
-- `install_dir`: Where to install the mindev binary temporarily. Default: `$HOME/.mindev`.
+- `release`: Version of mindev to use (e.g., `v0.1.3` or `latest`). Defaults to the current release.
+- `rules-directory`: The directory containing your `*.star` test files. Default: `.`.
+- `install-dir`: Where to install the mindev binary temporarily. Default: `$HOME/.mindev`.
