@@ -26,7 +26,7 @@ outputs:
     value: ${{ steps.upload-results.outputs.artifact-url }}
   junit-artifact-digest:
     description: SHA-256 digest of the JUnit XML result.
-    value: ${{ steps.upload-results.outputs.artifact-url }}
+    value: ${{ steps.upload-results.outputs.artifact-digest }}
   junit-filename:
     description: Filesystem path to the JUnixt XML result.
     value: ${{ steps.run-test.outputs.test-results }}
