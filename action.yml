@@ -24,7 +24,7 @@ inputs:
   release:
     description: 'The Minder client release to download and use. Defaults to a specific version for each release of the action.'
     required: false
-    default: 'v0.3.0'
+    default: 'v0.3.2'
 runs:
   using: composite
   steps:
@@ -32,7 +32,7 @@ runs:
       uses: sigstore/cosign-installer@v4.1.2
 
     - name: Install and validate CLI
-      uses: mindersec/minder-client-installer@v1.1.2
+      uses: mindersec/minder-client-installer@v1.1.4
       with:
         release: ${{ inputs.release }}
 
