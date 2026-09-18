@@ -17,6 +17,10 @@ inputs:
     description: 'Where to install the mindev binary'
     required: false
     default: '$HOME/.mindev'
+  flags:
+    description: 'Additional flags to pass to the mindev test command'
+    required: false
+    default: ''
 outputs:
   junit-artifact-id:
     description: GitHub ID of uploaded JUnit XML artifact.
@@ -48,8 +52,11 @@ runs:
       env:
         RULES_DIRECTORY: ${{ inputs.rules-directory }}
       run: |
-        echo "Running mindev test..."
-        mindev test -o junit "$RULES_DIRECTORY" > test-results.xml
+        if mindev test --help | grep -q "\-\-junit-file"; then
+          mindev test "$RULES_DIRECTORY" --junit-file test-results.xml ${{ inputs.flags }}
+        else
+          mindev test "$RULES_DIRECTORY" -o junit ${{ inputs.flags }} > test-results.xml
+        fi
         echo "test-results=test-results.xml" >> $GITHUB_OUTPUT
         echo "Test results written to test-results.xml"
 
