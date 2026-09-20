@@ -8,7 +8,7 @@ inputs:
   release:
     description: 'mindev release version to be installed (e.g., v0.3.0 or latest)'
     required: false
-    default: 'v0.3.0'
+    default: 'v0.3.2'
   rules-directory:
     description: 'Directory containing the rules and tests to run'
     required: false
@@ -41,7 +41,7 @@ runs:
       uses: sigstore/cosign-installer@v4.1.2
 
     - name: Install and validate CLI
-      uses: mindersec/minder-client-installer@v1.1.2
+      uses: mindersec/minder-client-installer@e33c4ed135967922432dcce5bb3d44a208cb64f5 # v1.1.4
       with:
         release: ${{ inputs.release }}
         install-dir: ${{ inputs.install-dir }}
@@ -52,7 +52,8 @@ runs:
       env:
         RULES_DIRECTORY: ${{ inputs.rules-directory }}
       run: |
-        if mindev test --help | grep -q "\-\-junit-file"; then
+        echo "Running mindev test..."
+        if mindev test --help | grep -q "\--junit-file"; then
           mindev test "$RULES_DIRECTORY" --junit-file test-results.xml ${{ inputs.flags }}
         else
           mindev test "$RULES_DIRECTORY" -o junit ${{ inputs.flags }} > test-results.xml
